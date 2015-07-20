@@ -1270,7 +1270,7 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64> >& vecSend, CW
                     return false;
                 BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins)
                 {
-                    int64 nCredit = pcoin.first->vout[pcoin.second].nValue;
+                    int64 nCredit = pcoin.first->vout[pcoin.second].nValue / 1000000;
                     dPriority += (double)nCredit * pcoin.first->GetDepthInMainChain();
                 }
 
@@ -1374,12 +1374,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     // The following split & combine thresholds are important to security
     // Should not be adjusted if you don't understand the consequences
     static unsigned int nStakeCombineAge = (60 * 60 * 24 * 15);
-    const CBlockIndex* pIndex0 = GetLastBlockIndex(pindexBest, false);
-    int64 nCombineThreshold = 0;
-    if(pIndex0->pprev)
-        nCombineThreshold = GetProofOfWorkReward(pIndex0->nHeight, MIN_TX_FEE, pIndex0->pprev->GetBlockHash()) * 10;
-    
-    
+    int64 nCombineThreshold = 250;
     // Keep a table of stuff to speed up POS mining
     static map<uint256, PosMiningStuff *> mapMiningStuff;
 
@@ -1544,19 +1539,34 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         {
             // Stop adding more inputs if already too many inputs
             if (txNew.vin.size() >= 100)
+            {
+                printf("CreateCoinStake: too many inputs\n");
                 break;
+            }
             // Stop adding more inputs if value is already pretty significant
-            if (nCredit > nCombineThreshold)
+            if (nCredit / 1000000 > nCombineThreshold)
+            {
+                printf("CreateCoinStake: inputs exceed combine value\n");
                 break;
+            }
             // Stop adding inputs if reached reserve limit
-            if (nCredit + pcoin.first->vout[pcoin.second].nValue > nBalance - nReserveBalance)
+            if (nCredit / 1000000 + pcoin.first->vout[pcoin.second].nValue / 1000000 > nBalance - nReserveBalance)
+            {
+                printf("CreateCoinStake: inputs exceed reserve balance\n");
                 break;
+            }
             // Do not add additional significant input
-            if (pcoin.first->vout[pcoin.second].nValue > nCombineThreshold)
+            if (pcoin.first->vout[pcoin.second].nValue / 1000000 > nCombineThreshold)
+            {
+                printf("CreateCoinStake: input too large\n");
                 continue;
+            }
             // Do not add input that is still too young
             if (pcoin.first->nTime + nStakeCombineAge > txNew.nTime)
+            {
+                printf("CreateCoinStake: input too young\n");
                 continue;
+            }
             txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
             nCredit += pcoin.first->vout[pcoin.second].nValue;
             vwtxPrev.push_back(pcoin.first);
@@ -1567,7 +1577,6 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         uint64 nCoinAge;
         CTxDB txdb("r");
         const CBlockIndex* pIndex0 = GetLastBlockIndex(pindexBest, false);
-
         if (!txNew.GetCoinAge(txdb, nCoinAge))
             return error("CreateCoinStake : failed to calculate coin age");
         nCredit += GetProofOfStakeReward(nCoinAge, nBits, txNew.nTime, pIndex0->nHeight);
