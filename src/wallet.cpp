@@ -1374,7 +1374,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     // The following split & combine thresholds are important to security
     // Should not be adjusted if you don't understand the consequences
     static unsigned int nStakeCombineAge = (60 * 60 * 24 * 15);
-    int64 nCombineThreshold = 250;
+    int64 nCombineThreshold = 25;
     // Keep a table of stuff to speed up POS mining
     static map<uint256, PosMiningStuff *> mapMiningStuff;
 
