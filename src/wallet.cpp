@@ -1373,7 +1373,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 {
     // The following split & combine thresholds are important to security
     // Should not be adjusted if you don't understand the consequences
-    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 15);
+    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 10);
     int64 nCombineThreshold = 250;
     // Keep a table of stuff to speed up POS mining
     static map<uint256, PosMiningStuff *> mapMiningStuff;
@@ -1514,6 +1514,8 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 
                 vwtxPrev.push_back(pcoin.first);
                 txNew.vout.push_back(CTxOut(0, scriptPubKeyOut));
+                if (block.GetBlockTime() + nStakeCombineAge > txNew.nTime)
+                    txNew.vout.push_back(CTxOut(0, scriptPubKeyOut)); //split stake
 
                 if (fDebug && GetBoolArg("-printcoinstake"))
                     printf("CreateCoinStake : added kernel type=%d\n", whichType);
@@ -1588,6 +1590,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         // Set output amount
         if (txNew.vout.size() == 3)
         {
+            printf("vout.size=\n");
             txNew.vout[1].nValue = ((nCredit - nMinFee) / 2 / CENT) * CENT;
             txNew.vout[2].nValue = nCredit - nMinFee - txNew.vout[1].nValue;
         }
