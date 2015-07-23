@@ -853,7 +853,7 @@ int CTxIndex::GetDepthInMainChain() const
 bool GetTransaction(const uint256 &hash, CTransaction &tx, uint256 &hashBlock)
 {
     {
-        LOCK(cs_main);
+        TRY_LOCK(cs_main);
         {
             LOCK(mempool.cs);
             if (mempool.exists(hash))
@@ -3632,7 +3632,7 @@ bool ProcessMessages(CNode* pfrom)
         try
         {
             {
-                LOCK(cs_main);
+                TRY_LOCK(cs_main);
                 fRet = ProcessMessage(pfrom, strCommand, vMsg);
             }
             if (fShutdown)
@@ -4292,7 +4292,7 @@ bool CheckWork(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
 
     // Found a solution
     {
-        LOCK(cs_main);
+        TRY_LOCK(cs_main);
         if (pblock->hashPrevBlock != hashBestChain)
             return error("BitcoinMiner : generated block is stale");
 
