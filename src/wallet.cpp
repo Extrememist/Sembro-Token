@@ -1378,9 +1378,17 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     printf(nBalance);
     if (nBalance > 25000){
     static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
+    int64 nCombineLowerThreshold = 25;
+    int64 nCombineThreshold = 250;
+    }else if (nBalance > 50000){
+    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
     int64 nCombineLowerThreshold = 50;
     int64 nCombineThreshold = 500;
     }else if (nBalance > 100000){
+    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
+    int64 nCombineLowerThreshold = 100;
+    int64 nCombineThreshold = 1000;
+    }else if (nBalance > 250000){
     static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
     int64 nCombineLowerThreshold = 250;
     int64 nCombineThreshold = 2500;
@@ -1573,7 +1581,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
             // Don't add input if it's too large !
             if (pcoin.first->vout[pcoin.second].nValue / 1000000 > nCombineLowerThreshold)
             {
-                printf("CreateCoinStake: input exceeds 100 coin hard limit\n");
+                printf("CreateCoinStake: input exceeds coin hard limit\n");
                 continue;
             }
             // Do not add additional significant input
