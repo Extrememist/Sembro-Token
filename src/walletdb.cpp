@@ -508,7 +508,7 @@ void ThreadFlushWalletDB(void* parg)
             nLastWalletUpdate = GetTime();
         }
 
-        if (nLastFlushed != nWalletDBUpdated && GetTime() - nLastWalletUpdate >= 2)
+        if (nLastFlushed != nWalletDBUpdated && GetTime() - nLastWalletUpdate >= 20)
         {
             TRY_LOCK(bitdb.cs_db,lockDb);
             if (lockDb)
