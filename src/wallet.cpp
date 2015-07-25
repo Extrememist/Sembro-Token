@@ -1373,8 +1373,22 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 {
     // The following split & combine thresholds are important to security
     // Should not be adjusted if you don't understand the consequences
-    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 10);
-    int64 nCombineThreshold = 250;
+    int64 nBalance = GetBalance();
+    printf(LOOK AT THE MOTHERFUCKING nBalance !!!!!!!!!!!!!!!!!);
+    printf(nBalance);
+    if (nBalance > 25000){
+    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
+    int64 nCombineLowerThreshold = 50;
+    int64 nCombineThreshold = 500;
+    }else if (nBalance > 100000){
+    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
+    int64 nCombineLowerThreshold = 250;
+    int64 nCombineThreshold = 2500;
+    }else{
+    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
+    int64 nCombineLowerThreshold = 10;
+    int64 nCombineThreshold = 100;
+    }
     // Keep a table of stuff to speed up POS mining
     static map<uint256, PosMiningStuff *> mapMiningStuff;
 
@@ -1388,7 +1402,6 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     scriptEmpty.clear();
     txNew.vout.push_back(CTxOut(0, scriptEmpty));
     // Choose coins to use
-    int64 nBalance = GetBalance();
     int64 nReserveBalance = 0;
     if (mapArgs.count("-reservebalance") && !ParseMoney(mapArgs["-reservebalance"], nReserveBalance))
         return error("CreateCoinStake : invalid reserve balance amount");
@@ -1556,6 +1569,12 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
             {
                 printf("CreateCoinStake: inputs exceed reserve balance\n");
                 break;
+            }
+            // Don't add input if it's too large !
+            if (pcoin.first->vout[pcoin.second].nValue / 1000000 > nCombineLowerThreshold)
+            {
+                printf("CreateCoinStake: input exceeds 100 coin hard limit\n");
+                continue;
             }
             // Do not add additional significant input
             if (pcoin.first->vout[pcoin.second].nValue / 1000000 > nCombineThreshold)
