@@ -78,7 +78,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
             Object entry;
 
             entry.push_back(Pair("txid", tx.GetHash().GetHex()));
-            TxToJSON(tx, entry);
+            TxToJSON(tx, 0, entry);
             entry.push_back(Pair("time", (boost::int64_t)tx.nTime));
 
             txinfo.push_back(entry);
@@ -88,7 +88,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
      }
         result.push_back(Pair("tx", txinfo));
         result.push_back(Pair("signature", HexStr(block.vchBlockSig.begin(), block.vchBlockSig.end())));
-        
+
      return result;
  }
 
