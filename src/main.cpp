@@ -2347,7 +2347,7 @@ bool CBlock::SignBlock(const CKeyStore& keystore)
 
     if(!IsProofOfStake())
     {
-        for(unsigned int i = 0; i < vtx[0].vout.size(); i++)
+            for(int i = 0; i < nVouts; i)
         {
             const CTxOut& txout = vtx[0].vout[i];
 
@@ -2376,7 +2376,6 @@ bool CBlock::SignBlock(const CKeyStore& keystore)
         const CTxOut& txout = vtx[1].vout[1];
 
         if (!Solver(txout.scriptPubKey, whichType, vSolutions))
-            return false;
 
         if (whichType == TX_PUBKEY)
         {
@@ -2391,8 +2390,7 @@ bool CBlock::SignBlock(const CKeyStore& keystore)
 
             return key.Sign(GetHash(), vchBlockSig);
         }
-    }
-
+     }
     printf("Sign failed\n");
     return false;
 }
@@ -2408,19 +2406,16 @@ bool CBlock::CheckBlockSignature() const
 
     if(IsProofOfStake())
     {
-        const CTxOut& txout = vtx[1].vout[1];
+        int nVouts = nTime < 1361664000 ? 1 : vtx[0].vout.size();
 
         if (!Solver(txout.scriptPubKey, whichType, vSolutions))
             return false;
         if (whichType == TX_PUBKEY)
         {
-            valtype& vchPubKey = vSolutions[0];
-            CKey key;
-            if (!key.SetPubKey(vchPubKey))
-                return false;
-            if (vchBlockSig.empty())
-                return false;
-            return key.Verify(GetHash(), vchBlockSig);
+        const CTxOut& txout = vtx[1].vout[1];
+        
+        if (!Solver(txout.scriptPubKey, whichType, vSolutions))
+            return false;
         }
     }
     else
@@ -2432,6 +2427,31 @@ bool CBlock::CheckBlockSignature() const
             if (!Solver(txout.scriptPubKey, whichType, vSolutions))
                 return false;
 
+        if (whichType == TX_PUBKEY)
+        {
+            valtype& vchPubKey = vSolutions[0];
+            CKey key;
+            if (!key.SetPubKey(vchPubKey))
+                return false;
+            if (vchBlockSig.empty())
+                return false;
+            return key.Verify(GetHash(), vchBlockSig);
+        }
+     }
+
+                return true;
+            }
+        }
+    }
+    else
+    {
+        for(int i = 0; i < nVouts; i)
+        {
+            const CTxOut& txout = vtx[0].vout[i];
+ 
+            if (!Solver(txout.scriptPubKey, whichType, vSolutions))
+                return false;
+ 
             if (whichType == TX_PUBKEY)
             {
                 // Verify
@@ -2443,7 +2463,7 @@ bool CBlock::CheckBlockSignature() const
                     continue;
                 if(!key.Verify(GetHash(), vchBlockSig))
                     continue;
-
+ 
                 return true;
             }
         }
