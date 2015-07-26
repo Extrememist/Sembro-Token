@@ -1,4 +1,4 @@
 install: 
   - qmake
   - make
-sudo: true
+sudo: false
