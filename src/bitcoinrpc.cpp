@@ -1295,7 +1295,7 @@ const CRPCTable tableRPC;
     }
  }
  
-+Value getnewpubkey(const Array& params, bool fHelp)
+Value getnewpubkey(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
         throw runtime_error(
@@ -1321,8 +1321,3 @@ const CRPCTable tableRPC;
 
     return HexStr(newKey.begin(), newKey.end());
 }
-
-
- Value getblockhash(const Array& params, bool fHelp)
- {
-     if (fHelp || params.size() != 1)
