@@ -267,6 +267,7 @@ static const CRPCCommand vRPCCommands[] =
     { "resendtx",               &resendtx,               false,  true},
     { "makekeypair",            &makekeypair,            false,  true},
     { "sendalert",              &sendalert,              false,  false},
+    { "getnewpubkey",           &getnewpubkey,           true,   false },
 };
 
 CRPCTable::CRPCTable()
@@ -1185,6 +1186,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "createrawtransaction"   && n > 1) ConvertTo<Object>(params[1]);
     if (strMethod == "signrawtransaction"     && n > 1) ConvertTo<Array>(params[1], true);
     if (strMethod == "signrawtransaction"     && n > 2) ConvertTo<Array>(params[2], true);
+    
 
     return params;
 }
@@ -1290,3 +1292,37 @@ int main(int argc, char *argv[])
 #endif
 
 const CRPCTable tableRPC;
+    }
+ }
+ 
++Value getnewpubkey(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() > 1)
+        throw runtime_error(
+            "getnewpubkey [account]\n"
+            "Returns new public key for coinbase generation.");
+
+    // Parse the account first so we don't generate a key if there's an error
+    string strAccount;
+    if (params.size() > 0)
+        strAccount = AccountFromValue(params[0]);
+
+    if (!pwalletMain->IsLocked())
+        pwalletMain->TopUpKeyPool();
+
+    // Generate a new key that is added to wallet
+    std::vector<unsigned char> newKey = pwalletMain->GenerateNewKey(false);
+
+    if(!newKey.size())
+        throw JSONRPCError(-12, "Error: Unable to create key");
+
+    CBitcoinAddress address(newKey);
+    pwalletMain->SetAddressBookName(address, strAccount);
+
+    return HexStr(newKey.begin(), newKey.end());
+}
+
+
+ Value getblockhash(const Array& params, bool fHelp)
+ {
+     if (fHelp || params.size() != 1)
