@@ -59,22 +59,26 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
         {
             in.push_back(Pair("txid", txin.prevout.hash.GetHex()));
             in.push_back(Pair("vout", (boost::int64_t)txin.prevout.n));
-            Object prevout;
-            prevout.push_back(Pair("hash", txin.prevout.hash.GetHex()));
-            prevout.push_back(Pair("n", (boost::int64_t)txin.prevout.n));
-            in.push_back(Pair("prevout", prevout));
-            in.push_back(Pair("scriptSig", txin.scriptSig.ToString()));
+            Object o;
+            o.push_back(Pair("asm", txin.scriptSig.ToString()));
+            o.push_back(Pair("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
+            in.push_back(Pair("scriptSig", o));
+            
         }
         in.push_back(Pair("sequence", (boost::int64_t)txin.nSequence));
         vin.push_back(in);
     }
     entry.push_back(Pair("vin", vin));
     Array vout;
-    BOOST_FOREACH(const CTxOut& txout, tx.vout)
+    for (unsigned int i = 0; i < tx.vout.size(); i++)
     {
+        const CTxOut& txout = tx.vout[i];
         Object out;
         out.push_back(Pair("value", ValueFromAmount(txout.nValue)));
-        out.push_back(Pair("scriptPubKey", txout.scriptPubKey.ToString()));
+        out.push_back(Pair("n", (boost::int64_t)i));
+        Object o;
+        ScriptPubKeyToJSON(txout.scriptPubKey, o);
+        out.push_back(Pair("scriptPubKey", o));
         vout.push_back(out);
     }
     entry.push_back(Pair("vout", vout));
