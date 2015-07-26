@@ -1,0 +1,9 @@
+sudo: true
+before_install:
+  - sudo apt-get install build-essential
+  - sudo apt-get install libdb++-dev
+  - sudo apt-get install libboost1.48-all-dev
+  - sudo apt-get install autoconf libssl-dev libprotobuf-dev protobuf-compiler libqt4-dev libqrencode-dev libtool
+install: 
+  - cd src
+  - sudo make -f makefile.unix
