@@ -79,18 +79,18 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
 
             entry.push_back(Pair("txid", tx.GetHash().GetHex()));
             TxToJSON(tx, 0, entry);
+            entry.push_back(Pair("time", (boost::int64_t)tx.nTime));
 
             txinfo.push_back(entry);
-        }
-        else
-            txinfo.push_back(tx.GetHash().GetHex());
-    }
+         }
+         else
+             txinfo.push_back(tx.GetHash().GetHex());
+     }
+        result.push_back(Pair("tx", txinfo));
+        result.push_back(Pair("signature", HexStr(block.vchBlockSig.begin(), block.vchBlockSig.end())));
 
-    result.push_back(Pair("tx", txinfo));
-    result.push_back(Pair("signature", HexStr(block.vchBlockSig.begin(), block.vchBlockSig.end())));
-
-    return result;
-}
+     return result;
+ }
 
 
 Value getblockcount(const Array& params, bool fHelp)
