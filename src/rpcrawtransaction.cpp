@@ -62,7 +62,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
             Object o;
             o.push_back(Pair("asm", txin.scriptSig.ToString()));
             o.push_back(Pair("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
-            in.push_back(Pair("scriptSig", txin.scriptSig.ToString()));
+            in.push_back(Pair("scriptSig", o));
         }
         in.push_back(Pair("sequence", (boost::int64_t)txin.nSequence));
         vin.push_back(in);
