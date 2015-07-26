@@ -78,7 +78,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
             Object entry;
 
             entry.push_back(Pair("txid", tx.GetHash().GetHex()));
-            TxToJSON(tx, 0, entry);
+            TxToJSON(tx, entry);
             entry.push_back(Pair("time", (boost::int64_t)tx.nTime));
 
             txinfo.push_back(entry);

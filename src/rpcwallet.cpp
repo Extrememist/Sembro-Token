@@ -1314,7 +1314,7 @@ Value gettransaction(const Array& params, bool fHelp)
     {
         const CWalletTx& wtx = pwalletMain->mapWallet[hash];
 
-        TxToJSON(wtx, 0, entry);
+        TxToJSON(wtx, entry);
 
         int64 nCredit = wtx.GetCredit();
         int64 nDebit = wtx.GetDebit();
@@ -1338,7 +1338,7 @@ Value gettransaction(const Array& params, bool fHelp)
         if (GetTransaction(hash, tx, hashBlock))
         {
             entry.push_back(Pair("txid", hash.GetHex()));
-            TxToJSON(tx, 0, entry);
+            TxToJSON(tx, entry);
             if (hashBlock == 0)
                 entry.push_back(Pair("confirmations", 0));
             else
