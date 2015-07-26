@@ -22,7 +22,7 @@ extern int nStakeMaxAge;
 // mapWallet
 //
 
-
+std::vector<unsigned char> CWallet::GenerateNewKey(bool bCompressed = true)
 struct CompareValueOnly
 {
     bool operator()(const pair<int64, pair<const CWalletTx*, unsigned int> >& t1,
@@ -32,7 +32,7 @@ struct CompareValueOnly
     }
 };
 
-std::vector<unsigned char> CWallet::GenerateNewKey(bool bCompressed = true)
+CPubKey CWallet::GenerateNewKey()
 {
     bool fCompressed = bCompressed ? CanSupportFeature(FEATURE_COMPRPUBKEY) : false; // default to compressed public keys if we want 0.6.0 wallets
 
