@@ -1,6 +1,7 @@
 sudo: true
 os:
   - linux
+script: bundle exec rspec spec
 before_install:
   - sudo apt-get install build-essential
   - sudo apt-get install libdb++-dev
