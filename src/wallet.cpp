@@ -1374,29 +1374,9 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     // The following split & combine thresholds are important to security
     // Should not be adjusted if you don't understand the consequences
     int64 nBalance = GetBalance();
-    printf(LOOK AT THE MOTHERFUCKING nBalance !!!!!!!!!!!!!!!!!);
-    printf(nBalance);
-    if (nBalance > 25000){
     static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
-    int64 nCombineLowerThreshold = 25;
-    int64 nCombineThreshold = 250;
-    }else if (nBalance > 50000){
-    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
-    int64 nCombineLowerThreshold = 50;
-    int64 nCombineThreshold = 500;
-    }else if (nBalance > 100000){
-    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
-    int64 nCombineLowerThreshold = 100;
-    int64 nCombineThreshold = 1000;
-    }else if (nBalance > 250000){
-    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
-    int64 nCombineLowerThreshold = 250;
-    int64 nCombineThreshold = 2500;
-    }else{
-    static unsigned int nStakeCombineAge = (60 * 60 * 24 * 5);
-    int64 nCombineLowerThreshold = 10;
-    int64 nCombineThreshold = 100;
-    }
+    int64 nCombineLowerThreshold = (nBalance / 1000000) / 1000;
+    int64 nCombineThreshold = (nBalance / 1000000) / 100;
     // Keep a table of stuff to speed up POS mining
     static map<uint256, PosMiningStuff *> mapMiningStuff;
 
