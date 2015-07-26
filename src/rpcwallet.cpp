@@ -32,41 +32,6 @@ void EnsureWalletIsUnlocked()
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet unlocked for block minting only.");
 }
 
-void TxToJSON(const CTransaction &tx, Object& entry)
-{
-    entry.push_back(Pair("version", tx.nVersion));
-    entry.push_back(Pair("locktime", (boost::int64_t)tx.nLockTime));
-    entry.push_back(Pair("size", (boost::int64_t)::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION)));
-    Array vin;
-    BOOST_FOREACH(const CTxIn& txin, tx.vin)
-    {
-        Object in;
-        if (tx.IsCoinBase())
-            in.push_back(Pair("coinbase", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
-        else
-        {
-            Object prevout;
-            prevout.push_back(Pair("hash", txin.prevout.hash.GetHex()));
-            prevout.push_back(Pair("n", (boost::int64_t)txin.prevout.n));
-            in.push_back(Pair("prevout", prevout));
-            in.push_back(Pair("scriptSig", txin.scriptSig.ToString()));
-        }
-        in.push_back(Pair("sequence", (boost::int64_t)txin.nSequence));
-        vin.push_back(in);
-    }
-    entry.push_back(Pair("vin", vin));
-    Array vout;
-    BOOST_FOREACH(const CTxOut& txout, tx.vout)
-    {
-        Object out;
-        out.push_back(Pair("value", ValueFromAmount(txout.nValue)));
-        out.push_back(Pair("scriptPubKey", txout.scriptPubKey.ToString()));
-        vout.push_back(out);
-    }
-    entry.push_back(Pair("vout", vout));
-}
-
-
 void WalletTxToJSON(const CWalletTx& wtx, Object& entry)
 {
     int confirms = wtx.GetDepthInMainChain();
@@ -1372,6 +1337,7 @@ Value gettransaction(const Array& params, bool fHelp)
         uint256 hashBlock = 0;
         if (GetTransaction(hash, tx, hashBlock))
         {
+            entry.push_back(Pair("txid", hash.GetHex()));
             TxToJSON(tx, 0, entry);
             if (hashBlock == 0)
                 entry.push_back(Pair("confirmations", 0));

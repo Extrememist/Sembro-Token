@@ -42,12 +42,11 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out)
     out.push_back(Pair("addresses", a));
 }
 
-void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
+void TxToJSON(const CTransaction &tx, Object& entry)
 {
-    entry.push_back(Pair("txid", tx.GetHash().GetHex()));
     entry.push_back(Pair("version", tx.nVersion));
-    entry.push_back(Pair("time", (boost::int64_t)tx.nTime));
     entry.push_back(Pair("locktime", (boost::int64_t)tx.nLockTime));
+    entry.push_back(Pair("size", (boost::int64_t)::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION)));
     Array vin;
     BOOST_FOREACH(const CTxIn& txin, tx.vin)
     {
@@ -56,48 +55,25 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
             in.push_back(Pair("coinbase", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
         else
         {
-            in.push_back(Pair("txid", txin.prevout.hash.GetHex()));
-            in.push_back(Pair("vout", (boost::int64_t)txin.prevout.n));
-            Object o;
-            o.push_back(Pair("asm", txin.scriptSig.ToString()));
-            o.push_back(Pair("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
-            in.push_back(Pair("scriptSig", o));
+            Object prevout;
+            prevout.push_back(Pair("hash", txin.prevout.hash.GetHex()));
+            prevout.push_back(Pair("n", (boost::int64_t)txin.prevout.n));
+            in.push_back(Pair("prevout", prevout));
+            in.push_back(Pair("scriptSig", txin.scriptSig.ToString()));
         }
         in.push_back(Pair("sequence", (boost::int64_t)txin.nSequence));
         vin.push_back(in);
     }
     entry.push_back(Pair("vin", vin));
     Array vout;
-    for (unsigned int i = 0; i < tx.vout.size(); i++)
+    BOOST_FOREACH(const CTxOut& txout, tx.vout)
     {
-        const CTxOut& txout = tx.vout[i];
         Object out;
         out.push_back(Pair("value", ValueFromAmount(txout.nValue)));
-        out.push_back(Pair("n", (boost::int64_t)i));
-        Object o;
-        ScriptPubKeyToJSON(txout.scriptPubKey, o);
-        out.push_back(Pair("scriptPubKey", o));
+        out.push_back(Pair("scriptPubKey", txout.scriptPubKey.ToString()));
         vout.push_back(out);
     }
     entry.push_back(Pair("vout", vout));
-
-    if (hashBlock != 0)
-    {
-        entry.push_back(Pair("blockhash", hashBlock.GetHex()));
-        map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
-        if (mi != mapBlockIndex.end() && (*mi).second)
-        {
-            CBlockIndex* pindex = (*mi).second;
-            if (pindex->IsInMainChain())
-            {
-                entry.push_back(Pair("confirmations", 1 + nBestHeight - pindex->nHeight));
-                entry.push_back(Pair("time", (boost::int64_t)pindex->nTime));
-                entry.push_back(Pair("blocktime", (boost::int64_t)pindex->nTime));
-            }
-            else
-                entry.push_back(Pair("confirmations", 0));
-        }
-    }
 }
 
 Value getrawtransaction(const Array& params, bool fHelp)
