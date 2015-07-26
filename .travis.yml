@@ -1,3 +1,4 @@
 install: 
-  - cd src && mkdir obj
+  - cd src
+  - mkdir obj
   - make -f makefile.unix
