@@ -42,7 +42,7 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out)
     out.push_back(Pair("addresses", a));
 }
 
-void TxToJSON(const CTransaction &tx, Object& entry)
+void TxToJSON(const CTransaction& tx, Object& entry)
 {
     entry.push_back(Pair("version", tx.nVersion));
     entry.push_back(Pair("locktime", (boost::int64_t)tx.nLockTime));
@@ -107,7 +107,7 @@ Value getrawtransaction(const Array& params, bool fHelp)
 
     Object result;
     result.push_back(Pair("hex", strHex));
-    TxToJSON(tx, result);
+    TxToJSON(tx, hashBlock, result);
     return result;
 }
 
