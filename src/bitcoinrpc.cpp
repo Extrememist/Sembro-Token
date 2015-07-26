@@ -1292,8 +1292,6 @@ int main(int argc, char *argv[])
 #endif
 
 const CRPCTable tableRPC;
-    }
- }
  
 Value getnewpubkey(const Array& params, bool fHelp)
 {
